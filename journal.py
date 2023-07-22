@@ -1,13 +1,12 @@
 import sys
 import json
-import datetime
+from datetime import datetime
 import time
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel, QLineEdit, QTextEdit, QPushButton, \
-    QListWidget, QListWidgetItem, QScrollArea, QToolBar, QAction, QWidget, QSizePolicy, QLineEdit, QHBoxLayout
-from PyQt5.QtGui import QFontDatabase, QFont, QMouseEvent
-from PyQt5 import QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5 import *
 
 MAX_CONTENT_LENGTH = 20
 journal_window = None
@@ -15,6 +14,14 @@ screen = 0
 mousePos = None
 
 button_font_path = "fonts/entsans.ttf"
+
+
+class JournalEntry:
+    def __init__(self, title, content, quote, date=datetime.now().strftime('%Y-%m-%d %H:%M')):
+        self.title = title
+        self.content = content
+        self.quote = quote
+        self.date = date
 
 
 def open_journal():
@@ -37,6 +44,7 @@ def open_journal():
         journal_window.mouseReleaseEvent = mouseReleaseEvent
 
         # Create the toolbar
+        global toolbar
         toolbar = QToolBar(journal_window)
         journal_window.addToolBar(Qt.LeftToolBarArea, toolbar)
         toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)  # Align toolbar buttons text beside the icon
@@ -49,9 +57,18 @@ def open_journal():
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         toolbar.addWidget(spacer)
 
+        global show_entries_action
         show_entries_action = QAction('Entries', journal_window)
         show_entries_action.triggered.connect(lambda: show_all_entries(journal_window))
         toolbar.addAction(show_entries_action)
+
+        global sort_action
+        sort_action = QAction(QIcon("icons/filter.png"), 'Sort', journal_window)
+        sort_action.setCheckable(True)  # Make the action toggleable
+        sort_action.setChecked(True)
+        sort_action.toggled.connect(sort_entries)  # Connect the toggled signal to the sort method
+        toolbar.addAction(sort_action)  # Add the action to the toolbar
+        sort_action.setVisible(False)
 
         save_menu()
 
@@ -90,7 +107,7 @@ def save_menu():
 
     save_button = QPushButton('Save Entry', central_widget)
     save_button.clicked.connect(
-        lambda: save_journal_entry(journal_window, title_entry.text(), content_entry.toPlainText(), quote_entry.text()))
+        lambda: save_journal_entry(journal_window, title_entry, content_entry, quote_entry))
 
     # Create the layout
     layout.addWidget(title_label)
@@ -104,6 +121,261 @@ def save_menu():
     journal_window.setCentralWidget(central_widget)
     journal_window.show()
     screen = 1
+
+
+def save_journal_entry(window, title_entry, content_entry, quote_entry):
+    try:
+        title = title_entry.text()
+        content = content_entry.toPlainText()
+        quote = quote_entry.text()
+
+        entry = JournalEntry(title, content, quote)
+
+        with open('journal_entries.json', 'a') as file:
+            json.dump(entry.__dict__, file)
+            file.write('\n')
+
+        # Clear the line edits
+        title_entry.clear()
+        content_entry.clear()
+        quote_entry.clear()
+
+    except Exception as e:
+        print(f"An error occurred while saving the journal entry: {e}")
+
+
+def show_all_entries(window):
+    global screen, journal_window, show_entries_action
+
+    try:
+        entries = []
+
+        # Open the file in read mode, create it if it doesn't exist
+        with open('journal_entries.json', 'a+') as file:
+            file.seek(0)  # Move the cursor to the beginning of the file
+            for line in file:
+                entry = json.loads(line)
+                entries.append(
+                    JournalEntry(entry['title'], entry['content'], entry['quote'], entry['date']))
+
+        entries.sort(key=lambda x: x.date, reverse=True)
+
+        # Create a search bar widget
+        search_bar = QLineEdit()
+        search_bar.setPlaceholderText("Search Entries")
+        search_bar.setObjectName("search_bar")
+
+        # Create a search button
+        search_button = QPushButton("Search")
+        search_button.setObjectName("search_button")
+        search_button.clicked.connect(lambda: filter_entries(window, search_bar.text(), entries))
+        # Connect the returnPressed signal of the search bar to the search button's click slot
+        search_bar.returnPressed.connect(search_button.click)
+
+        # Create a horizontal layout for the search bar and button
+        search_layout = QHBoxLayout()
+        search_layout.addWidget(search_bar)
+        search_layout.addWidget(search_button)
+
+        # Create the central widget and layout
+        central_widget = QWidget(journal_window)
+        layout = QVBoxLayout(central_widget)
+
+        # Add the search layout to the main layout
+        layout.addLayout(search_layout)
+
+        entry_list_widget = QListWidget()
+        entry_list_widget.setObjectName("entries_list")
+        entry_list_widget.itemClicked.connect(lambda item: open_entry(window, item.text()))
+        entry_list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        entry_list_widget.customContextMenuRequested.connect(
+            lambda pos: show_context_menu(pos, entry_list_widget, entries))
+
+        for entry in entries:
+            if len(entry.content) > MAX_CONTENT_LENGTH:
+                content = entry.content[:MAX_CONTENT_LENGTH] + "..."
+            else:
+                content = entry.content
+            entry_list_widget.addItem(QListWidgetItem(
+                f"Date: {entry.date}\nTitle: {entry.title}\nContent:\n{content}\nWhat I Learned Today (Quote): {entry.quote}\n"))
+
+        # Add the list widget to the main layout
+        layout.addWidget(entry_list_widget)
+
+        # Set the central widget
+        journal_window.setCentralWidget(central_widget)
+
+        sort_action.setVisible(True)
+        show_entries_action.setVisible(False)
+
+        screen = 2
+
+    except Exception as e:
+        print(f"An error occurred while showing all entries: {e}")
+
+
+def show_context_menu(position, list_widget, entries):
+    menu = QMenu()
+    with open('style.css', 'r') as style_file:
+        menu.setStyleSheet(style_file.read())
+    delete_action = menu.addAction("Delete")
+    delete_action.triggered.connect(lambda: delete_entry(list_widget.itemAt(position), list_widget, entries))
+    menu.exec_(list_widget.viewport().mapToGlobal(position))
+
+
+def delete_entry(item, list_widget, entries):
+    if item is None:
+        return
+
+    # Get the title of the entry to be deleted
+    item_text = item.text()
+    lines = item_text.split('\n')
+    entry_title = ""
+    for line in lines:
+        if line.startswith('Title: '):
+            # Extract the title from the line
+            entry_title = line[len('Title: '):]
+            break
+
+    # Delete the entry from the entries list
+    deleted_entry = None
+    for entry in entries:
+        if entry.title == entry_title:
+            deleted_entry = entry
+            entries.remove(entry)
+            break
+
+    if deleted_entry is None:
+        print("Error: Entry not found.")
+        return
+
+    # Write the updated entries back to the JSON file
+    with open('journal_entries.json', 'w') as file:
+        for entry in entries:
+            file.write(json.dumps(entry.__dict__) + '\n')
+
+    # Delete the entry from the GUI
+    list_widget.takeItem(list_widget.row(item))
+
+
+def sort_entries(checked):
+    try:
+        entries = []
+
+        # Open the file in read mode, create it if it doesn't exist
+        with open('journal_entries.json', 'a+') as file:
+            file.seek(0)  # Move the cursor to the beginning of the file
+            for line in file:
+                entry = json.loads(line)
+                entries.append(
+                    JournalEntry(entry['title'], entry['content'], entry['quote'], entry['date']))
+
+        # Sort the entries by date
+        entries.sort(key=lambda x: x.date, reverse=checked)
+
+        # Update the displayed entries
+        update_entry_list(journal_window, entries)
+
+    except Exception as e:
+        print(f"An error occurred while sorting the entries: {e}")
+
+
+def filter_entries(window, search_query, entries):
+    try:
+        filtered_entries = []
+        search_query = search_query.lower().replace(" ", "")  # Remove whitespace from search query
+        for entry in entries:
+            # Remove whitespace from entry fields before comparing
+            entry_date = entry.date.replace(" ", "")
+            entry_title = entry.title.lower().replace(" ", "")
+            entry_content = entry.content.lower().replace(" ", "")
+
+            if search_query in entry_date or search_query in entry_title or search_query in entry_content:
+                filtered_entries.append(entry)
+
+        # Update the displayed entries based on the filtered results
+        update_entry_list(window, filtered_entries)
+
+    except Exception as e:
+        print(f"An error occurred while filtering entries: {e}")
+
+
+def update_entry_list(window, entries):
+    entry_list_widget = window.findChild(QListWidget, "entries_list")
+    if entry_list_widget:
+        entry_list_widget.clear()
+
+        if entries:
+            for entry in entries:
+                if len(entry.content) > MAX_CONTENT_LENGTH:
+                    content = entry.content[:MAX_CONTENT_LENGTH] + "..."
+                else:
+                    content = entry.content
+                entry_list_widget.addItem(QListWidgetItem(
+                    f"Date: {entry.date}\nTitle: {entry.title}\nContent:\n{content}\nWhat I Learned Today (Quote): {entry.quote}\n"))
+        else:
+            item = QListWidgetItem()
+            item.setText("No results found.")
+            entry_list_widget.addItem(item)
+
+
+def open_entry(window, entry_text):
+    global screen
+
+    try:
+        entry_lines = entry_text.split('\n')
+        entry_lines = [line.strip() for line in entry_lines if line.strip()]
+
+        # Clear the existing layout
+        clear_layout(window.centralWidget().layout())
+
+        entry_widget = QWidget(window)
+        entry_layout = QVBoxLayout(entry_widget)
+
+        # Create a QTextBrowser to display the entry
+        text_browser = QTextBrowser(entry_widget)
+        text_browser.setOpenExternalLinks(True)  # Enable opening hyperlinks
+
+        # Join the entry lines with "<br>" to display them as separate lines in the QTextBrowser
+        entry_html = "<br>".join(entry_lines)
+        text_browser.setHtml(entry_html)
+
+        entry_layout.addWidget(text_browser)
+
+        window.setCentralWidget(entry_widget)
+        sort_action.setVisible(False)
+        screen = 3
+
+    except Exception as e:
+        print(f"An error occurred while opening the entry window: {e}")
+
+
+def back_button():
+    global screen, show_entries_action, sort_action
+
+    screen -= 1
+
+    if screen == 0:
+        journal_window.close()
+    elif screen == 1:
+        show_entries_action.setVisible(True)
+        sort_action.setVisible(False)
+        save_menu()
+    elif screen == 2:
+        sort_action.setVisible(True)
+        show_entries_action.setVisible(False)
+        show_all_entries(journal_window)
+    elif screen == 3:
+        sort_action.setVisible(False)
+        show_entries_action.setVisible(False)
+        open_entry(journal_window)
+
+
+def clear_layout(layout):
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()
 
 
 def mousePressEvent(event: QMouseEvent):
@@ -125,174 +397,6 @@ def mouseReleaseEvent(event: QMouseEvent):
     if event.button() == QtCore.Qt.LeftButton:
         mousePos = None
         event.accept()
-
-
-def save_journal_entry(window, title, content, quote):
-    try:
-        entry = {
-            "date": str(datetime.date.today()),
-            "title": title,
-            "content": content,
-            "quote": quote
-        }
-
-        with open('journal_entries.json', 'a') as file:
-            json.dump(entry, file)
-            file.write('\n')
-
-        window.close()
-
-    except Exception as e:
-        print(f"An error occurred while saving the journal entry: {e}")
-
-
-def show_all_entries(window):
-    global screen
-
-    try:
-        entries = []
-        with open('journal_entries.json', 'r') as file:
-            for line in file:
-                entries.append(json.loads(line))
-
-        # Clear the existing layout
-        clear_layout(window.centralWidget().layout())
-
-        # Create a search bar widget
-        search_bar = QLineEdit()
-        search_bar.setPlaceholderText("Search Entries")
-        search_bar.setObjectName("search_bar")
-
-        # Create a search button
-        search_button = QPushButton("Search")
-        search_button.setObjectName("search_button")
-        search_button.clicked.connect(lambda: filter_entries(window, search_bar.text(), entries))
-        # Connect the returnPressed signal of the search bar to the search button's click slot
-        search_bar.returnPressed.connect(search_button.click)
-
-        # Create a horizontal layout for the search bar and button
-        search_layout = QHBoxLayout()
-        search_layout.addWidget(search_bar)
-        search_layout.addWidget(search_button)
-
-        # Add the search layout to the main layout
-        window.centralWidget().layout().addLayout(search_layout)
-
-        scroll_widget = QWidget(window)
-        scroll_layout = QVBoxLayout(scroll_widget)
-
-        entry_list_widget = QListWidget(scroll_widget)
-        entry_list_widget.setObjectName("entries_list")
-        entry_list_widget.itemClicked.connect(lambda item: open_entry_window(window, item.text()))
-
-        for entry in entries:
-            content = entry['content']
-            if len(content) > MAX_CONTENT_LENGTH:
-                content = content[:MAX_CONTENT_LENGTH] + "..."
-
-            item = QListWidgetItem()
-            item.setText(
-                f"Date: {entry['date']}\nTitle: {entry['title']}\nContent:\n{content}\nWhat I Learned Today (Quote): {entry['quote']}\n")
-            entry_list_widget.addItem(item)
-
-        scroll_layout.addWidget(entry_list_widget)
-        scroll_area = QScrollArea(window)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(scroll_widget)
-
-        window.centralWidget().layout().addWidget(scroll_area)
-
-        screen = 2
-
-    except Exception as e:
-        print(f"An error occurred while showing all entries: {e}")
-
-
-def filter_entries(window, search_query, entries):
-    try:
-        filtered_entries = []
-        search_query = search_query.lower().replace(" ", "")  # Remove whitespace from search query
-        for entry in entries:
-            # Remove whitespace from entry fields before comparing
-            entry_date = entry['date'].lower().replace(" ", "")
-            entry_title = entry['title'].lower().replace(" ", "")
-            entry_content = entry['content'].lower().replace(" ", "")
-
-            if search_query in entry_date or search_query in entry_title or search_query in entry_content:
-                filtered_entries.append(entry)
-
-        # Update the displayed entries based on the filtered results
-        update_entry_list(window, filtered_entries)
-
-    except Exception as e:
-        print(f"An error occurred while filtering entries: {e}")
-
-
-def update_entry_list(window, entries):
-    entry_list_widget = window.findChild(QListWidget, "entries_list")
-    if entry_list_widget:
-        entry_list_widget.clear()
-
-        if entries:
-            for entry in entries:
-                content = entry['content']
-                if len(content) > MAX_CONTENT_LENGTH:
-                    content = content[:MAX_CONTENT_LENGTH] + "..."
-
-                item = QListWidgetItem()
-                item.setText(
-                    f"Date: {entry['date']}\nTitle: {entry['title']}\nContent:\n{content}\nWhat I Learned Today (Quote): {entry['quote']}\n")
-                entry_list_widget.addItem(item)
-        else:
-            item = QListWidgetItem()
-            item.setText("No results found.")
-            entry_list_widget.addItem(item)
-
-
-def open_entry_window(window, entry_text):
-    global screen
-
-    try:
-        entry_lines = entry_text.split('\n')
-        entry_lines = [line.strip() for line in entry_lines if line.strip()]
-
-        # Clear the existing layout
-        clear_layout(window.centralWidget().layout())
-
-        entry_widget = QWidget(window)
-        entry_layout = QVBoxLayout(entry_widget)
-
-        for line in entry_lines:
-            label = QLabel(line, entry_widget)
-            entry_layout.addWidget(label)
-
-        window.setCentralWidget(entry_widget)
-        screen = 3
-
-    except Exception as e:
-        print(f"An error occurred while opening the entry window: {e}")
-
-
-def back_button():
-    global screen
-
-    screen -= 1
-
-    if screen == 0:
-        journal_window.close()
-    elif screen == 1:
-        save_menu()
-    elif screen == 2:
-        show_all_entries(journal_window)
-    elif screen == 3:
-        show_all_entries(journal_window)
-
-
-def clear_layout(layout):
-    while layout.count():
-        child = layout.takeAt(0)
-        if child.widget():
-            child.widget().deleteLater()
 
 
 if __name__ == '__main__':

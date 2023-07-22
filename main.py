@@ -1,12 +1,11 @@
 import sys
 import json
 import os
-from PyQt5.QtCore import Qt, QDate
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, \
-    QToolBar, QSizePolicy, QHBoxLayout, QAction, QSlider, QDesktopWidget, QGridLayout, QDateTimeEdit
-from PyQt5.QtGui import QFont, QFontDatabase, QIcon
-from journal import open_journal
-from tasklist import TaskListWidget, Task
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from journal import *
+from tasklist import *
 
 button_font_path = "fonts/entsans.ttf"
 
@@ -164,11 +163,13 @@ class MainWindow(QMainWindow):
             self.task_list.hide()
             self.task_entry.hide()
             self.add_button.hide()
+            self.datetime_edit.hide()
             self.task_list_history.show()
         else:
             self.task_list.show()
             self.task_entry.show()
             self.add_button.show()
+            self.datetime_edit.show()
             self.task_list_history.hide()
 
     def toggle_keep_on_top(self):
@@ -212,6 +213,8 @@ class MainWindow(QMainWindow):
                 task = Task(task_text, due_date=selected_date, due_time=selected_time)  # Create a Task object
                 self.task_list.add_task(task)  # Pass the Task object to the add_task method
                 self.task_entry.clear()
+                self.datetime_edit.setDate(QDate.currentDate())
+                self.datetime_edit.setTime(self.default_datetime.time())
 
         except Exception as e:
             print(f"An error occurred while adding a task: {e}")

@@ -145,10 +145,6 @@ class TaskListWidget(QListWidget):
             return False
 
     def sort_tasks(self, reverse=False):
-        """Sort tasks based on their importance and added_date_time.
-        Args:
-            reverse (bool): If True, sort tasks in descending order of added_date_time; otherwise, sort in ascending order.
-        """
         # Get the number of tasks
         task_count = self.count()
         # Get all tasks
