@@ -1,0 +1,412 @@
+/* QScrollBar */
+QScrollBar:vertical {
+    background-color: #333131;
+    width: 10px;
+}
+
+/* Scrollbar Handle */
+QScrollBar::handle:vertical {
+    background-color: #171717;
+    border-radius: 8px;
+}
+
+/* Scrollbar Arrow Buttons */
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background-color: #333131;
+}
+
+/* Scrollbar Background */
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background-color: #333131;
+}
+
+/* Hover Styles */
+QScrollBar:vertical:hover {
+    background-color: #3d3d3d;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #1f1f1f;
+}
+
+QScrollBar::add-line:vertical:hover,
+QScrollBar::sub-line:vertical:hover {
+    background-color: #3d3d3d;
+}
+
+QScrollBar::add-page:vertical:hover,
+QScrollBar::sub-page:vertical:hover {
+    background-color: #3d3d3d;
+}
+
+/* Pressed Styles */
+QScrollBar:vertical:pressed {
+    background-color: #4c4c4c;
+}
+
+QScrollBar::handle:vertical:pressed {
+    background-color: #292929;
+}
+
+QScrollBar::add-line:vertical:pressed,
+QScrollBar::sub-line:vertical:pressed {
+    background-color: #4c4c4c;
+}
+
+QScrollBar::add-page:vertical:pressed,
+QScrollBar::sub-page:vertical:pressed {
+    background-color: #4c4c4c;
+}
+
+/* Disabled Styles */
+QScrollBar::add-line:vertical:disabled,
+QScrollBar::sub-line:vertical:disabled {
+    background-color: #333131;
+    border-color: transparent;
+}
+
+QScrollBar::add-page:vertical:disabled,
+QScrollBar::sub-page:vertical:disabled {
+    background-color: #333131;
+    border-color: transparent;
+}
+
+/* Scrollbar Height */
+QScrollBar::handle:vertical {
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 20px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    height: 20px;
+}
+
+QMainWindow {
+    background-color: #252525;
+    border-radius: 5px;
+}
+
+/* Increase font size for all elements */
+* {
+  font-size: 17px; /* You can adjust the font size value as needed */
+}
+
+QLabel {
+    color: white;
+    background-color: transparent;
+}
+
+QLabel#title {
+    color: white;
+    padding-right: 10px;
+    font-size: 20px;
+}
+
+#due_date_label {
+    color: white;
+    background-color: transparent;
+    font-size: 12px;
+}
+
+QPushButton {
+    background-color: #171717;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QPushButton:hover {
+    background-color: #1f1f1f;
+}
+
+QPushButton:pressed {
+    background-color: #353535;
+}
+
+QDateTimeEdit {
+    background-color: #333131;
+    color: white;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+QLineEdit {
+    background-color: #333131;
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QTextEdit {
+    background-color: #333131;
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QComboBox {
+    background-color: #171717;
+    color: white;
+}
+
+QListWidget {
+    background-color: #333131;
+    color: white;
+    border: none;
+}
+
+#tasks {
+    background-color: #333131;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QListWidget#entries_list::item {
+    background-color: #333131;
+    color: white;
+    border: 1px solid #232323;
+}
+
+QListWidget#entries_list::item:selected {
+    background-color: #4d4d4d;
+    border: 1px solid #ffffff;
+}
+
+QListWidget#entries_list::item:hover {
+    background-color: #3d3d3d;
+    border: 1px solid #ffffff;
+}
+
+QCheckBox {
+    background-color: #333131;
+    color: white;
+    border-radius: 8px;
+}
+
+QToolBar {
+    background-color: #171717;
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QToolBar QToolButton {
+    background-color: #0c0c0c;
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    /* Set top margin, right margin, bottom margin, left margin */
+    margin: 10px 10px 10px 10px;
+    align-content: center;
+}
+
+QToolBar QToolButton:hover {
+    background-color: #333131;
+}
+
+QToolBar QToolButton:pressed {
+    background-color: #0c0c0cd4;
+}
+
+QScrollArea {
+    border: none;
+    background-color: #333131;
+    scroll-behavior: smooth;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QScrollArea QWidget {
+    background-color: #333131;  /* Set the outer part to white */
+}
+
+
+#task_checkbox {
+    color:rgb(255,255,255);
+    background-color: transparent;
+}
+
+#task_checkbox::indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 5px;
+}
+
+#task_checkbox::indicator:unchecked {
+    border:1px solid rgb(51,51,51);
+    background:rgb(91,90,90);
+}
+
+#task_checkbox::indicator:unchecked:pressed {
+    border:1px solid rgb(51,51,51);
+    background:rgb(0,143,170);
+}
+
+#task_checkbox::indicator:checked:pressed {
+    border:1px solid rgb(51,51,51);
+    background:rgb(91,90,90);
+}
+
+QSlider::groove {
+    border: none;
+    background-color: #333131;
+    border-radius: 5px;
+    height: 10px;
+    margin: 0px;
+    padding: 0px;
+    }
+
+QSlider::handle {
+    background-color: black;
+    border: none; /* Remove the border around the handle */
+    height: 20px; /* Set the height of the handle */
+    width: 20px; /* Set the width of the handle */
+    margin: -2px 0; /* Adjust the position of the handle */
+    border-radius: 5px;
+    }
+
+QSlider::sub-page {
+    background-color: #171717; /* Set the color of the filled portion of the slider */
+    border-radius: 5px; /* Apply rounded corners to the filled portion */
+}
+
+#star_button {
+    background-color: transparent;
+}
+
+#star_button::indicator {
+    margin-top: 3px;
+    width: 15px;
+    height: 15px;
+    border-radius: 8px;
+}
+
+#star_button::indicator:unchecked {
+    border:1px solid rgb(51,51,51);
+    background:rgb(91,90,90);
+}
+
+#star_button::indicator:checked {
+    border:1px solid rgb(51,51,51);
+    background-color: #ff2323;
+}
+
+#task_item {
+
+}
+
+#task_item:hover {
+    background-color: #4d4d4d;
+    border:1px solid rgb(51,51,51);
+    border-radius: 6px;
+}
+
+/* QInputDialog */
+QInputDialog {
+    background-color: #333131;
+    color: white;
+    border: 1px solid #171717;
+    border-radius: 5px;
+}
+
+QInputDialog QLabel {
+    color: white;
+}
+
+QInputDialog QLineEdit {
+    background-color: #171717;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+/* QMessageBox */
+QMessageBox {
+    background-color: #333131;
+    color: white;
+    border: 1px solid #171717;
+    border-radius: 5px;
+}
+
+QMessageBox QLabel {
+    color: white;
+}
+
+QMessageBox QPushButton {
+    background-color: #171717;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #1f1f1f;
+}
+
+QMessageBox QPushButton:pressed {
+    background-color: #353535;
+}
+
+/* QMenu */
+QMenu {
+    background-color: #333131;
+    color: white;
+    border: 1px solid #171717;
+    border-radius: 5px;
+}
+
+QMenu::item {
+    background-color: transparent;
+}
+
+QMenu::item:selected {
+    background-color: #171717;
+}
+
+/* Custom QDialog for Edit Name */
+QDialog#edit_name_dialog {
+    background-color: #333131;
+    color: white;
+    border: 1px solid #171717;
+    border-radius: 5px;
+}
+
+/* QLineEdit for entering new task name */
+QLineEdit#edit_name_line_edit {
+    background-color: #171717;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+/* QPushButton for confirming new task name */
+QPushButton#edit_name_button {
+    background-color: #171717;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+QPushButton#edit_name_button:hover {
+    background-color: #1f1f1f;
+}
+
+QPushButton#edit_name_button:pressed {
+    background-color: #353535;
+}
+
+
+
