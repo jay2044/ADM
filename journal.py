@@ -186,8 +186,9 @@ def show_all_entries(window):
 
         entry_list_widget = QListWidget()
         entry_list_widget.setObjectName("entries_list")
-        entry_list_widget.itemClicked.connect(lambda item: open_entry(window, item.text()))
         entry_list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        entry_list_widget.itemClicked.connect(
+            lambda item: open_entry(window, item.data(Qt.UserRole)))  # Pass the entry object to open_entry
         entry_list_widget.customContextMenuRequested.connect(
             lambda pos: show_context_menu(pos, entry_list_widget, entries))
 
@@ -196,8 +197,11 @@ def show_all_entries(window):
                 content = entry.content[:MAX_CONTENT_LENGTH] + "..."
             else:
                 content = entry.content
-            entry_list_widget.addItem(QListWidgetItem(
-                f"Date: {entry.date}\nTitle: {entry.title}\nContent:\n{content}\nWhat I Learned Today (Quote): {entry.quote}\n"))
+            item = QListWidgetItem(
+                f"Date: {entry.date}\nTitle: {entry.title}\nContent:\n{content}\nWhat I Learned Today (Quote): {entry.quote}\n"
+            )
+            item.setData(Qt.UserRole, entry)  # Store the entry object as the item's data
+            entry_list_widget.addItem(item)
 
         # Add the list widget to the main layout
         layout.addWidget(entry_list_widget)
@@ -319,35 +323,34 @@ def update_entry_list(window, entries):
             entry_list_widget.addItem(item)
 
 
-def open_entry(window, entry_text):
+
+def open_entry(window, entry):
     global screen
 
-    try:
-        entry_lines = entry_text.split('\n')
-        entry_lines = [line.strip() for line in entry_lines if line.strip()]
+    # Read the HTML template from the file
+    with open("template.html", "r") as file:
+        html_template = file.read()
 
-        # Clear the existing layout
-        clear_layout(window.centralWidget().layout())
+    # Replace the placeholders with the entry data
+    html_content = html_template.format(
+        title=entry.title,
+        date=entry.date,
+        content=entry.content.replace("\n", "<br>"),  # Replace newlines with <br> for HTML
+        quote=entry.quote
+    )
 
-        entry_widget = QWidget(window)
-        entry_layout = QVBoxLayout(entry_widget)
+    # Create a QTextBrowser and set its HTML
+    text_browser = QTextBrowser()
+    text_browser.setHtml(html_content)
 
-        # Create a QTextBrowser to display the entry
-        text_browser = QTextBrowser(entry_widget)
-        text_browser.setOpenExternalLinks(True)  # Enable opening hyperlinks
+    # Add the QTextBrowser to the window
+    central_widget = QWidget()
+    layout = QVBoxLayout(central_widget)
+    layout.addWidget(text_browser)
+    window.setCentralWidget(central_widget)
 
-        # Join the entry lines with "<br>" to display them as separate lines in the QTextBrowser
-        entry_html = "<br>".join(entry_lines)
-        text_browser.setHtml(entry_html)
-
-        entry_layout.addWidget(text_browser)
-
-        window.setCentralWidget(entry_widget)
-        sort_action.setVisible(False)
-        screen = 3
-
-    except Exception as e:
-        print(f"An error occurred while opening the entry window: {e}")
+    sort_action.setVisible(False)
+    screen = 3
 
 
 def back_button():
