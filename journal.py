@@ -323,7 +323,6 @@ def update_entry_list(window, entries):
             entry_list_widget.addItem(item)
 
 
-
 def open_entry(window, entry):
     global screen
 

@@ -146,11 +146,21 @@ class MainWindow(QMainWindow):
             self.resize_slider.valueChanged.connect(self.on_resize_slider_changed)
             self.layout.addWidget(self.resize_slider, alignment=Qt.AlignBottom)
 
-            self.task_list.add_task(Task("Task"))  # Create a Task object when adding a task
-            self.task_list_history.add_task(Task("Task", False))  # Create a Task object for history
+            # Load tasks from pickle file when the application starts
+            try:
+                self.task_list.load_tasks_from_pickle('task_list.pkl')
+                self.task_list_history.load_tasks_from_pickle('task_list_history.pkl')
+            except FileNotFoundError:
+                print("No tasks file found. A new file will be created when tasks are saved.")
 
         except Exception as e:
             print(f"An error occurred while initializing the application: {e}")
+
+    def closeEvent(self, event):
+        """Save tasks to pickle file when the application closes."""
+        self.task_list.save_tasks_to_pickle('task_list.pkl')
+        self.task_list_history.save_tasks_to_pickle('task_list_history.pkl')
+        super().closeEvent(event)  # Call the superclass's closeEvent method to do the default close action
 
     def sort(self, checked):
         self.task_list.sort_tasks(reverse=checked)

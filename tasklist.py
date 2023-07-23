@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import pickle
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QPoint, QDate
@@ -232,7 +233,6 @@ class TaskListWidget(QListWidget):
         except Exception as e:
             print(f"An error occurred while handling checkbox state: {e}")
 
-
     def handle_star_button(self, checked, task_obj):
         try:
             task_obj.is_important = checked
@@ -247,6 +247,19 @@ class TaskListWidget(QListWidget):
 
         except Exception as e:
             print(f"An error occurred while handling star button click: {e}")
+
+    def save_tasks_to_pickle(self, file_path):
+        """Save all tasks to a pickle file."""
+        task_list = [self.item(i).data(Qt.UserRole) for i in range(self.count())]
+        with open(file_path, 'wb') as file:
+            pickle.dump(task_list, file)
+
+    def load_tasks_from_pickle(self, file_path):
+        """Load tasks from a pickle file and add them to the task list."""
+        with open(file_path, 'rb') as file:
+            task_list = pickle.load(file)
+        for task in task_list:
+            self.add_task(task)
 
 
 
