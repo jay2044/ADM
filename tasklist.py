@@ -1,12 +1,16 @@
 import json
 import os
 import random
+import time
 import pickle
+from plyer import notification
+import schedule
+import threading
+from datetime import datetime, timedelta
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QPoint, QDate
 from PyQt5.QtGui import QDrag
-from datetime import datetime
 
 
 class Task:
@@ -31,6 +35,13 @@ class TaskListWidget(QListWidget):
         self.setDragDropMode(QAbstractItemView.InternalMove)  # Enable dragging and dropping of items
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+        self.scheduler_thread = threading.Thread(target=self.run_scheduler)
+        self.scheduler_thread.start()
+
+    def run_scheduler(self):
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
 
     def show_context_menu(self, position):
         # Get the task item on which the user clicked
@@ -124,7 +135,8 @@ class TaskListWidget(QListWidget):
 
     def delete_task(self, item):
         # Ask the user to confirm deletion
-        reply = QMessageBox.question(self, 'Delete Task', 'Are you sure you want to delete this task?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Delete Task', 'Are you sure you want to delete this task?',
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             # Get the task object from the item
             task = item.data(Qt.UserRole)
@@ -180,6 +192,10 @@ class TaskListWidget(QListWidget):
             due_date = QLabel(f"{task_obj.due_date} {task_obj.due_time}")
             due_date.setObjectName("due_date_label")
             due_date.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            # Check if the task is due today
+            if task_obj.due_date and datetime.strptime(task_obj.due_date, '%Y-%m-%d').date() == datetime.now().date():
+                # Change the color of the label to red
+                due_date.setStyleSheet("color: red;")
             layout.addWidget(due_date)
 
             # Create a QPushButton for the star button
@@ -204,8 +220,37 @@ class TaskListWidget(QListWidget):
             print(f"{task_obj.name} is added")
             print(task_obj.due_date)
 
+            # Schedule a notification for 5 minutes before the task's due time
+            due_datetime_str = task_obj.due_date + ' ' + task_obj.due_time
+            due_datetime = datetime.strptime(due_datetime_str, '%Y-%m-%d %I:%M %p')
+            notification_time = due_datetime - timedelta(minutes=5)
+
+            if notification_time > datetime.now():
+                schedule.every().day.at(notification_time.strftime('%H:%M')).do(
+                    self.send_notification,
+                    task_obj.name,
+                    'is due in 5 minutes.'
+                )
+
+            # Schedule a notification for the task's due time
+            if due_datetime > datetime.now():
+                schedule.every().day.at(due_datetime.strftime('%H:%M')).do(
+                    self.send_notification,
+                    task_obj.name,
+                    'is now due.'
+                )
+
         except Exception as e:
-            print(f"An error occurred while adding a task: {e}")
+                print(f"An error occurred while adding a task: {e}")
+
+    def send_notification(self, task_name, message):
+        notification.notify(
+            title='Task Due',
+            message=f'Task {task_name} {message}',
+            app_name='Task Manager',
+            # add a path to your icon file here if you have one
+            app_icon=None
+        )
 
     def remove_task(self, task_obj):
         try:
@@ -260,7 +305,3 @@ class TaskListWidget(QListWidget):
             task_list = pickle.load(file)
         for task in task_list:
             self.add_task(task)
-
-
-
-

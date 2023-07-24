@@ -6,6 +6,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from journal import *
 from tasklist import *
+import logging
+
+logging.basicConfig(filename='app.log', filemode='w', level=logging.DEBUG)
+logging.debug('This message should go to the log file')
+logging.info('So should this')
+logging.warning('And this, too')
 
 button_font_path = "fonts/entsans.ttf"
 
@@ -260,6 +266,7 @@ if __name__ == '__main__':
     try:
         app = QApplication(sys.argv)
         window = MainWindow()
+        app.setWindowIcon(QIcon('icons/app_icon.png'))
         # Load the style sheet
         with open('style.css', 'r') as style_file:
             window.setStyleSheet(style_file.read())
