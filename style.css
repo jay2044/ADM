@@ -408,5 +408,32 @@ QPushButton#edit_name_button:pressed {
     background-color: #353535;
 }
 
+QListWidget {
+    background-color: #333131;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QListWidget::item {
+    background-color: #333131;
+    color: white;
+    border: 1px solid #232323;
+}
+
+QListWidget::item:selected {
+    background-color: #4d4d4d;
+    border: 1px solid #ffffff;
+}
+
+QListWidget::item:hover {
+    background-color: #3d3d3d;
+    border: 1px solid #ffffff;
+}
+
+#news_window {
+    /*background-color: transparent;*/
+}
+
 
 
