@@ -1,18 +1,45 @@
-# ADM
-Description:
+# Advanced Day Manager (ADM)
 
-Advanced Day Manager is a comprehensive daily management application, which integrates a task management system and a daily journaling feature, facilitating an organized and productive daily routine. Built with PyQt5, the application offers a user-friendly interface, making it easy to navigate through tasks and journal entries.
+Advanced Day Manager is a comprehensive daily management application that integrates robust task management and daily journaling features to foster an organized and productive routine. Built with PyQt5, ADM is designed to enhance user productivity by providing an intuitive user interface and sophisticated functionality tailored for professionals, students, and anyone aiming for a structured day.
 
-Key Features:
+## Description
 
-Task Management: Create, modify, and remove tasks with attributes such as name, status, priority level, due date/time, and importance status. The tasks can be sorted based on their creation time, priority, and importance.
+ADM offers a user-friendly interface that allows users to effectively manage their daily tasks and reflect on their day through journaling. This application is built using Python and PyQt5, with additional features supported by the News-API for personalized news feeds.
 
-Journaling: Users can jot down their daily reflections, learnings, and experiences in the journal section. The application captures the date, title, content, and a personal quote for each entry. Journal entries can be easily searched and filtered.
+## Key Features
 
-Interactive User Interface: The application provides a seamless user experience with its drag-and-drop feature for tasks, a search function for journal entries, and a customizable layout.
+- **Task Management**: Create, modify, and delete tasks with attributes like name, status, and priority. Tasks can be sorted by creation time, priority, or importance.
+- **Journaling**: Maintain a digital journal for daily reflections and experiences with features like search and filter.
+- **Interactive UI**: Drag-and-drop for tasks, customizable layouts, and a search function for journal entries.
+- **Importance Highlighting**: Important tasks are prominently displayed at the top of the list.
+- **News Integration**: Personalized news display module using News-API to align content with user interests.
 
-Customizable Sorting: The application offers toggleable sorting for tasks, allowing users to switch between ascending and descending order based on their preferences.
+## Technical Highlights
 
-Importance Highlighting: Tasks marked as important are always displayed at the top of the task list, making it easier for users to prioritize their tasks.
+- **Task Reminder System**: Alerts for due dates and times to ensure timely task completion.
+- **Advanced Sorting Algorithms**: For efficient task management and journal entry retrieval.
+- **Comprehensive Task History**: With edit and delete options for complete task governance.
+- **Personalized News Feed**: Integrated using News-API to fetch news tailored to user interests.
 
-Advanced Day Manager is an all-in-one solution for individuals looking to streamline their day-to-day tasks and capture daily reflections. It is an excellent tool for professionals, students, or anyone seeking a structured and organized routine.
+## Skills Highlight
+
+- **PyQt5 GUI Development**: Crafted a seamless and interactive user interface.
+- **Algorithm Implementation**: Developed sorting and searching algorithms for optimal data management.
+- **API Integration**: Utilized News-API for real-time, personalized content delivery.
+- **Event-driven Programming**: Implemented sophisticated event handling for UI interactions and background processes.
+
+## Components Overview
+
+- **NewsAPI.py**: Manages news retrieval using News-API.
+- **journal.py**: Controls journal entry management and UI.
+- **main.py**: Orchestrates the main application workflow including task management and window interactions.
+- **tasklist.py**: Manages task functionalities like editing, deleting, and sorting.
+
+## Getting Started
+
+1. **Installation**: Clone the repository and install required dependencies.
+2. **Running ADM**: Execute `main.py` to launch the application. Ensure your API key for News-API is valid and active.
+
+## Closing
+
+ADM is an all-in-one solution designed to streamline your daily management tasks and capture your daily reflections, making it an indispensable tool for anyone seeking a more organized lifestyle.
