@@ -1,4 +1,5 @@
 # Advanced Day Manager (ADM)
+![image](https://github.com/jay2044/ADM/assets/117245060/518d6f99-361a-4cfe-83d2-df07625eb466)
 
 Advanced Day Manager is a comprehensive daily management application that integrates robust task management and daily journaling features to foster an organized and productive routine. Built with PyQt5, ADM is designed to enhance user productivity by providing an intuitive user interface and sophisticated functionality tailored for professionals, students, and anyone aiming for a structured day.
 
